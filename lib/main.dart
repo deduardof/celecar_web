@@ -1,6 +1,7 @@
 import 'package:celecar_web/database/database.dart';
 import 'package:celecar_web/models/usuario.dart';
 import 'package:celecar_web/pages/controle.dart';
+import 'package:celecar_web/pages/page_home.dart';
 import 'package:celecar_web/pages/page_login.dart';
 import 'package:flutter/material.dart';
 
@@ -26,9 +27,7 @@ class MyApp extends StatelessWidget {
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.done) {
               if (snapshot.hasData) {
-                return Controle(
-                    usuario: snapshot.data
-                        as Usuario); //HomePage(usuario: snapshot.data as Usuario);
+                return Controle(usuario: snapshot.data as Usuario);
               } else {
                 return LoginPage();
               }

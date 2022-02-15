@@ -3,13 +3,12 @@ import 'package:celecar_web/models/usuario.dart';
 import 'package:celecar_web/models/veiculo.dart';
 import 'package:celecar_web/pages/page_home_header.dart';
 import 'package:celecar_web/pages/page_home_veiculos.dart';
-import 'package:celecar_web/widgets/widget_veiculo.dart';
 import 'package:flutter/material.dart';
 
 class HomePage extends StatefulWidget {
   final Usuario usuario;
 
-  HomePage({Key? key, required this.usuario}) : super(key: key);
+  const HomePage({Key? key, required this.usuario}) : super(key: key);
 
   @override
   State<HomePage> createState() => _HomePageState();
