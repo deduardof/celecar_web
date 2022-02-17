@@ -10,6 +10,7 @@ class Veiculo {
   String local;
   int status;
 
+  static const int todos = -1;
   static const int disponivel = 0;
   static const int emuso = 1;
   static const int manutencao = 2;
@@ -40,5 +41,10 @@ class Veiculo {
         return 'Manutenção';
     }
     return '';
+  }
+
+  @override
+  String toString() {
+    return getDescricao();
   }
 }

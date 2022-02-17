@@ -1,3 +1,4 @@
+import 'package:celecar_web/models/setor.dart';
 import 'package:celecar_web/models/veiculo.dart';
 import 'package:supabase/supabase.dart';
 
@@ -10,8 +11,13 @@ class DBVeiculos {
   Future<List<Veiculo>> getVeiculos(int setor) async {
     List<Veiculo> veiculos = List.empty(growable: true);
 
-    final response =
-        await _client.from(_table).select().eq('setor', setor).execute();
+    PostgrestResponse response;
+    if (setor == Setor.todos) {
+      response = await _client.from(_table).select().execute();
+    } else {
+      response =
+          await _client.from(_table).select().eq('setor', setor).execute();
+    }
 
     if (!response.hasError) {
       for (var veiculo in response.data) {

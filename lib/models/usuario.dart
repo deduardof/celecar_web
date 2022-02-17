@@ -18,4 +18,9 @@ class Usuario {
       required this.setor,
       this.setorNome = '',
       required this.loggedIn});
+
+  @override
+  String toString() {
+    return nome;
+  }
 }

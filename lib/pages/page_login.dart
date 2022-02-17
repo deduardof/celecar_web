@@ -1,7 +1,7 @@
 import 'dart:convert';
 
 import 'package:celecar_web/database/database.dart';
-import 'package:celecar_web/pages/page_home.dart';
+import 'package:celecar_web/pages/controle.dart';
 import 'package:crypto/crypto.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -21,7 +21,7 @@ class LoginPage extends StatelessWidget {
       if (usuario != null) {
         Navigator.pushAndRemoveUntil(
             context,
-            MaterialPageRoute(builder: (context) => HomePage(usuario: usuario)),
+            MaterialPageRoute(builder: (context) => Controle(usuario: usuario)),
             (route) => false);
       }
     });

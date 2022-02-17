@@ -1,7 +1,6 @@
 import 'package:celecar_web/database/database.dart';
 import 'package:celecar_web/models/usuario.dart';
 import 'package:celecar_web/pages/controle.dart';
-import 'package:celecar_web/pages/page_home.dart';
 import 'package:celecar_web/pages/page_login.dart';
 import 'package:flutter/material.dart';
 

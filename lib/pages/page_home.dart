@@ -18,7 +18,7 @@ class _HomePageState extends State<HomePage> {
   List<Veiculo> veiculos = List.empty(growable: true);
 
   _loadVeiculos() async {
-    await Database().getVeiculos(widget.usuario.setor).then((list) {
+    await Database().getVeiculos(setor: widget.usuario.setor).then((list) {
       veiculos = list;
       if (mounted) {
         setState(() {});
