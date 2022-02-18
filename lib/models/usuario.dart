@@ -7,6 +7,7 @@ class Usuario {
   String setorNome;
   DateTime loggedIn;
 
+  static const int todos = -1;
   static const int ativo = 0;
   static const int inativo = 1;
 

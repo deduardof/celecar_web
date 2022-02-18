@@ -5,6 +5,7 @@ import 'package:celecar_web/pages/menu_principal.dart';
 import 'package:celecar_web/pages/page_home.dart';
 import 'package:celecar_web/pages/page_login.dart';
 import 'package:celecar_web/pages/page_pesquisar.dart';
+import 'package:celecar_web/pages/page_pesquisar_lista.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
@@ -51,7 +52,13 @@ class _ControleState extends State<Controle> {
         }
       case 1:
         {
-          _page = PesquisarPage();
+          _page = const PesquisarPage();
+          break;
+        }
+      case 2:
+        {
+          //_page = PesquisarLista(viagens: viagens);
+          break;
         }
     }
     setState(() {});

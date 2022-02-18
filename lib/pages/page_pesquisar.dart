@@ -2,6 +2,8 @@ import 'package:celecar_web/database/database.dart';
 import 'package:celecar_web/models/setor.dart';
 import 'package:celecar_web/models/usuario.dart';
 import 'package:celecar_web/models/veiculo.dart';
+import 'package:celecar_web/pages/page_pesquisar_lista.dart';
+import 'package:celecar_web/pdfs/pdfdata.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:intl/intl.dart';
@@ -14,15 +16,14 @@ class PesquisarPage extends StatefulWidget {
 }
 
 class _PesquisarPageState extends State<PesquisarPage> {
-  final List<String> veiculos = ['HB20S 0X00', 'HB20S 0X01', 'HB20S 0X02'];
-  String dropdownValue = 'HB20S 0X00';
   List<Setor> _setores = List.empty(growable: true);
   List<Veiculo> _veiculos = List.empty(growable: true);
   List<Usuario> _usuarios = List.empty(growable: true);
+  List<PDFData> _viagens = List.empty(growable: true);
   late Setor _setorSelected;
   late Veiculo _veiculoSelected;
   late Usuario _usuarioSelected;
-  DateTime _initialDate = DateTime.now().subtract(Duration(days: 30));
+  DateTime _initialDate = DateTime.now().subtract(const Duration(days: 30));
   DateTime _finalDate = DateTime.now();
   final TextEditingController _initialDateController = TextEditingController();
   final TextEditingController _finalDateController = TextEditingController();
@@ -43,15 +44,57 @@ class _PesquisarPageState extends State<PesquisarPage> {
   Future _loadInitial() async {
     await _database.getSetores(status: Setor.ativo).then((list) {
       _setores = list;
+      _setores.insert(
+          0,
+          Setor(
+              id: Setor.todos,
+              nome: 'Todos',
+              endereco: '',
+              status: Setor.ativo));
       _setorSelected = _setores.first;
     });
     await _database.getVeiculos().then((list) {
       _veiculos = list;
+      _veiculos.insert(
+          0,
+          Veiculo(
+              id: Veiculo.todos,
+              marca: '',
+              modelo: 'Todos',
+              ano: 0,
+              placa: '',
+              cor: '',
+              quilometragem: 0,
+              setor: 0));
       _veiculoSelected = _veiculos.first;
     });
     await _database.getUsuarios().then((list) {
       _usuarios = list;
+      _usuarios.insert(
+          0,
+          Usuario(
+              id: Usuario.todos,
+              matricula: 0,
+              email: '',
+              nome: 'Todos',
+              setor: 0,
+              loggedIn: DateTime.now()));
       _usuarioSelected = _usuarios.first;
+    });
+  }
+
+  Future _loadViagens() async {
+    await _database
+        .getViagens(
+            setor: _setorSelected.id,
+            veiculo: _veiculoSelected.id,
+            usuario: _usuarioSelected.id,
+            dataInicio: _initialDate,
+            dataFim: _finalDate)
+        .then((viagens) {
+      setState(() {
+        _viagens = viagens;
+      });
     });
   }
 
@@ -101,6 +144,17 @@ class _PesquisarPageState extends State<PesquisarPage> {
     );
   }
 
+  Future _updateSetores() async {
+    await _database.getVeiculos(setor: _setorSelected.id).then((veiculos) {
+      _veiculos = veiculos;
+      _veiculoSelected = _veiculos.first;
+    });
+    await _database.getUsuarios(setor: _setorSelected.id).then((usuarios) {
+      _usuarios = usuarios;
+      _usuarioSelected = _usuarios.first;
+    });
+  }
+
   Widget _firstLine() {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 2.0),
@@ -108,7 +162,12 @@ class _PesquisarPageState extends State<PesquisarPage> {
         mainAxisAlignment: MainAxisAlignment.start,
         mainAxisSize: MainAxisSize.max,
         children: [
-          _item(_setores, _setorSelected, (value) => _setorSelected = value),
+          _item(_setores, _setorSelected, (value) {
+            _setorSelected = value;
+            _updateSetores().whenComplete(() => setState(
+                  () {},
+                ));
+          }),
           _item(
               _veiculos, _veiculoSelected, (value) => _veiculoSelected = value),
           _item(
@@ -187,7 +246,9 @@ class _PesquisarPageState extends State<PesquisarPage> {
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 10.0),
             child: ElevatedButton(
-                onPressed: () {},
+                onPressed: () {
+                  _loadViagens();
+                },
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: const [
@@ -213,39 +274,56 @@ class _PesquisarPageState extends State<PesquisarPage> {
     if (_loading) {
       return const Center(child: CircularProgressIndicator());
     } else {
-      return Column(
-        children: [
-          Card(
-            elevation: 10,
-            margin: const EdgeInsets.only(top: 10.0, right: 10.0, bottom: 10.0),
-            child: Padding(
-              padding: const EdgeInsets.all(10.0),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-                  Row(mainAxisAlignment: MainAxisAlignment.start, children: [
-                    Expanded(child: _label('Setor')),
-                    Expanded(child: _label('Veículo')),
-                    Expanded(child: _label('Usuário'), flex: 2),
-                  ]),
-                  _firstLine(),
-                  Padding(
-                    padding: const EdgeInsets.only(top: 20.0),
-                    child: Row(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        children: [
-                          Expanded(child: _label('Período inicial'), flex: 2),
-                          Expanded(child: _label('Período final'), flex: 2),
-                          const Spacer()
-                        ]),
-                  ),
-                  _secondLine()
-                ],
+      return Padding(
+        padding: const EdgeInsets.all(10.0),
+        child: Column(
+          mainAxisSize: MainAxisSize.max,
+          children: [
+            Card(
+              elevation: 10,
+              //margin: const EdgeInsets.only(top: 10.0, right: 10.0, bottom: 10.0),
+              child: Padding(
+                padding: const EdgeInsets.all(10.0),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    Row(mainAxisAlignment: MainAxisAlignment.start, children: [
+                      Expanded(child: _label('Setor')),
+                      Expanded(child: _label('Veículo')),
+                      Expanded(child: _label('Usuário'), flex: 2),
+                    ]),
+                    _firstLine(),
+                    Padding(
+                      padding: const EdgeInsets.only(top: 20.0),
+                      child: Row(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: [
+                            Expanded(child: _label('Período inicial'), flex: 2),
+                            Expanded(child: _label('Período final'), flex: 2),
+                            const Spacer()
+                          ]),
+                    ),
+                    _secondLine()
+                  ],
+                ),
               ),
             ),
-          ),
-        ],
+            (_viagens.isEmpty)
+                ? const Card(
+                    elevation: 10,
+                    //margin:
+                    //EdgeInsets.only(left: 0, top: 0, right: 10, bottom: 10),
+                    child: Center(
+                        child: Padding(
+                      padding:
+                          EdgeInsets.symmetric(vertical: 20.0, horizontal: 10),
+                      child: Text(
+                          'Não foram encontradas viagens com estes parâmetros de pesquisa.'),
+                    )))
+                : PesquisarLista(viagens: _viagens)
+          ],
+        ),
       );
     }
   }

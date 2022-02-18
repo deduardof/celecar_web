@@ -1,4 +1,5 @@
 class PDFData {
+  String veiculo;
   DateTime data;
   String setor;
   String de;
@@ -14,7 +15,8 @@ class PDFData {
   int pedagio;
 
   PDFData(
-      {required this.data,
+      {required this.veiculo,
+      required this.data,
       required this.setor,
       required this.de,
       required this.para,

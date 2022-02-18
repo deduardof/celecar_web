@@ -49,6 +49,11 @@ class Database {
       await DBVeiculos(_client).getVeiculos(setor);
 
   Future<List<PDFData>> getViagens(
-          int veiculo, DateTime dataInicio, DateTime dataFim) async =>
-      await DBViagens(_client).getViagens(veiculo, dataInicio, dataFim);
+          {int setor = Setor.todos,
+          int veiculo = Veiculo.todos,
+          int usuario = Usuario.todos,
+          required DateTime dataInicio,
+          required DateTime dataFim}) async =>
+      await DBViagens(_client)
+          .getViagens(setor, veiculo, usuario, dataInicio, dataFim);
 }

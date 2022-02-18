@@ -17,12 +17,14 @@ class PDFCreator {
     _getViagens();
   }
 
-  _getViagens() async => await Database()
-      .getViagens(veiculo, DateTime(2022, 1, 1), DateTime(2022, 1, 31));
+  _getViagens() async => await Database().getViagens(
+      veiculo: veiculo,
+      dataInicio: DateTime(2022, 1, 1),
+      dataFim: DateTime(2022, 1, 31));
 
   addPage() async {
     pdf.addPage(pw.Page(
-      margin: pw.EdgeInsets.symmetric(vertical: 20, horizontal: 20),
+      margin: const pw.EdgeInsets.symmetric(vertical: 20, horizontal: 20),
       pageFormat: PdfPageFormat.a4,
       orientation: pw.PageOrientation.landscape,
       build: (context) {
