@@ -147,10 +147,30 @@ class _PesquisarPageState extends State<PesquisarPage> {
   Future _updateSetores() async {
     await _database.getVeiculos(setor: _setorSelected.id).then((veiculos) {
       _veiculos = veiculos;
+      _veiculos.insert(
+          0,
+          Veiculo(
+              id: Veiculo.todos,
+              marca: '',
+              modelo: 'Todos',
+              ano: 0,
+              placa: '',
+              cor: '',
+              quilometragem: 0,
+              setor: 0));
       _veiculoSelected = _veiculos.first;
     });
     await _database.getUsuarios(setor: _setorSelected.id).then((usuarios) {
       _usuarios = usuarios;
+      _usuarios.insert(
+          0,
+          Usuario(
+              id: Usuario.todos,
+              matricula: 0,
+              email: '',
+              nome: 'Todos',
+              setor: 0,
+              loggedIn: DateTime.now()));
       _usuarioSelected = _usuarios.first;
     });
   }

@@ -4,7 +4,10 @@ import 'package:flutter/material.dart';
 
 class HomeVeiculos extends StatelessWidget {
   final List<Veiculo> veiculos;
-  const HomeVeiculos({Key? key, required this.veiculos}) : super(key: key);
+  final Function(Veiculo veiculo) onPressed;
+  const HomeVeiculos(
+      {Key? key, required this.veiculos, required this.onPressed})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -24,7 +27,8 @@ class HomeVeiculos extends StatelessWidget {
             shrinkWrap: true,
             itemCount: veiculos.length,
             itemBuilder: (context, index) {
-              return VeiculoWidget(veiculo: veiculos.elementAt(index));
+              return VeiculoWidget(
+                  veiculo: veiculos.elementAt(index), onPressed: onPressed);
             },
             separatorBuilder: (BuildContext context, int index) =>
                 const Divider()),

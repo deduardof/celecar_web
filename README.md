@@ -1,19 +1,9 @@
 # celecar_web
 
-A new Flutter project.
+Sistema de Gestão de Diários de Bordo - CeleCAR
 
-## Getting Started
+# Desenvolvido em Flutter 
+# Desenvolvedor: Douglas Eduardo <deduardof@gmail.com>
 
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://flutter.dev/docs/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://flutter.dev/docs/cookbook)
-
-For help getting started with Flutter, view our
-[online documentation](https://flutter.dev/docs), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
-
-
-- Salvar o IP do usuário ao efetuar login (criar tabela sessao);
+Sistema de gerenciamento de veículos, abastecimentos, pedágios e deslocamentos.
+Desenvolvido para utilização na Celepar com intuito de modernizar a forma de registro de Diários de Bordo.

@@ -1,13 +1,17 @@
 import 'package:celecar_web/database/database.dart';
 import 'package:celecar_web/models/menu_principal_item.dart';
 import 'package:celecar_web/models/usuario.dart';
+import 'package:celecar_web/models/veiculo.dart';
 import 'package:celecar_web/pages/menu_principal.dart';
 import 'package:celecar_web/pages/page_home.dart';
 import 'package:celecar_web/pages/page_login.dart';
 import 'package:celecar_web/pages/page_pesquisar.dart';
-import 'package:celecar_web/pages/page_pesquisar_lista.dart';
+import 'package:celecar_web/pages/page_relatorios.dart';
+import 'package:celecar_web/pages/page_veiculo.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+
+enum Pages { home, pesquisar, relatorios, gerenciar }
 
 class Controle extends StatefulWidget {
   final Usuario usuario;
@@ -26,47 +30,61 @@ class _ControleState extends State<Controle> {
     menu.add(MenuPrincipalItem(
         texto: 'Home',
         icone: FontAwesomeIcons.home,
-        onPressed: () => _onMenuPressed(0)));
+        onPressed: () => _onMenuPressed(Pages.home)));
     menu.add(MenuPrincipalItem(
         texto: 'Pesquisar',
         icone: FontAwesomeIcons.search,
-        onPressed: () => _onMenuPressed(1)));
+        onPressed: () => _onMenuPressed(Pages.pesquisar)));
     menu.add(MenuPrincipalItem(
         texto: 'Relatórios',
         icone: FontAwesomeIcons.print,
-        onPressed: () => _onMenuPressed(2)));
+        onPressed: () => _onMenuPressed(Pages.relatorios)));
     menu.add(MenuPrincipalItem(
         texto: 'Gerenciar',
         icone: FontAwesomeIcons.usersCog,
-        onPressed: () => _onMenuPressed(3)));
+        onPressed: () => _onMenuPressed(Pages.gerenciar)));
 
     return menu;
   }
 
-  _onMenuPressed(int id) {
-    switch (id) {
-      case 0:
+  _onMenuPressed(Pages page) {
+    switch (page) {
+      case Pages.home:
         {
-          _page = HomePage(usuario: widget.usuario);
+          _page = HomePage(usuario: widget.usuario, onPressed: _openVeiculo);
           break;
         }
-      case 1:
+      case Pages.pesquisar:
         {
           _page = const PesquisarPage();
           break;
         }
-      case 2:
+      case Pages.relatorios:
         {
-          //_page = PesquisarLista(viagens: viagens);
+          _page = RelatoriosPage();
+          break;
+        }
+      case Pages.gerenciar:
+        {
           break;
         }
     }
     setState(() {});
   }
 
+  _openVeiculo(Veiculo veiculo) {
+    print('Veículo: $veiculo - ${veiculo.setor}');
+    setState(() {
+      _page = VeiculoPage(veiculo: veiculo);
+    });
+  }
+
   @override
   void initState() {
-    _page = HomePage(usuario: widget.usuario);
+    _page = HomePage(
+      usuario: widget.usuario,
+      onPressed: _openVeiculo,
+    );
     super.initState();
   }
 

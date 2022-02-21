@@ -1,12 +1,14 @@
+import 'package:celecar_web/models/veiculo.dart';
 import 'package:flutter/material.dart';
 
 class VeiculoPage extends StatelessWidget {
-  const VeiculoPage({Key? key}) : super(key: key);
+  final Veiculo veiculo;
+  const VeiculoPage({Key? key, required this.veiculo}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      child: Text('Veículo page'),
+    return Center(
+      child: Text('Veículo $veiculo'),
     );
   }
 }

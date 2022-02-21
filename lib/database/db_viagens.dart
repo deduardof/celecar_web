@@ -1,4 +1,3 @@
-import 'package:celecar_web/models/setor.dart';
 import 'package:celecar_web/models/usuario.dart';
 import 'package:celecar_web/models/veiculo.dart';
 import 'package:celecar_web/pdfs/pdfdata.dart';

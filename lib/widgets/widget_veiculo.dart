@@ -1,10 +1,12 @@
 import 'package:celecar_web/models/veiculo.dart';
-import 'package:celecar_web/pdfs/pdf_creator.dart';
 import 'package:flutter/material.dart';
 
 class VeiculoWidget extends StatelessWidget {
   final Veiculo veiculo;
-  const VeiculoWidget({Key? key, required this.veiculo}) : super(key: key);
+  final Function(Veiculo veiculo) onPressed;
+  const VeiculoWidget(
+      {Key? key, required this.veiculo, required this.onPressed})
+      : super(key: key);
 
   Widget _item(String label, String content, {int flex = 1}) {
     return Expanded(
@@ -40,8 +42,10 @@ class VeiculoWidget extends StatelessWidget {
                   : 'Em viagem'),
           ElevatedButton(
               onPressed: () {
-                PDFCreator(veiculo: veiculo.id).addPage();
+                onPressed(veiculo);
               },
+              //PDFCreator(veiculo: veiculo.id).addPage();
+
               child: const Text('Gerenciar')),
         ],
       ),

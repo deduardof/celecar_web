@@ -7,8 +7,9 @@ import 'package:flutter/material.dart';
 
 class HomePage extends StatefulWidget {
   final Usuario usuario;
-
-  const HomePage({Key? key, required this.usuario}) : super(key: key);
+  final Function(Veiculo veiculo) onPressed;
+  const HomePage({Key? key, required this.usuario, required this.onPressed})
+      : super(key: key);
 
   @override
   State<HomePage> createState() => _HomePageState();
@@ -28,7 +29,6 @@ class _HomePageState extends State<HomePage> {
 
   @override
   void initState() {
-    // TODO: implement initState
     _loadVeiculos();
     super.initState();
   }
@@ -40,7 +40,7 @@ class _HomePageState extends State<HomePage> {
       child: Column(
         children: [
           HomeHeader(usuario: widget.usuario),
-          HomeVeiculos(veiculos: veiculos)
+          HomeVeiculos(veiculos: veiculos, onPressed: widget.onPressed)
         ],
       ),
     );

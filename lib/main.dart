@@ -3,10 +3,12 @@ import 'package:celecar_web/models/usuario.dart';
 import 'package:celecar_web/pages/controle.dart';
 import 'package:celecar_web/pages/page_login.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/date_symbol_data_local.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
-  runApp(const MyApp());
+
+  initializeDateFormatting('pt_BR', null).then((_) => runApp(const MyApp()));
 }
 
 class MyApp extends StatelessWidget {
@@ -17,7 +19,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Gestão de Diário de Bordo - CeleCAR',
+      title: 'CeleCAR - Gestão de Diário de Bordo',
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),

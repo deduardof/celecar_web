@@ -16,7 +16,7 @@ class MenuPrincipal extends StatelessWidget {
 
   _button(String label, IconData icon, Function() onPressed) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 10),
+      padding: const EdgeInsets.only(left: 10, top: 5, right: 0, bottom: 5),
       child: ElevatedButton(
         style: ButtonStyle(
             backgroundColor: MaterialStateProperty.resolveWith((states) {
@@ -46,29 +46,15 @@ class MenuPrincipal extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final item = MenuPrincipalItem(
-        texto: 'Meu Botão',
-        icone: FontAwesomeIcons.google,
-        onPressed: () {
-          print('teste');
-        });
     return Align(
       alignment: Alignment.topRight,
       child: Container(
-          //constraints: const BoxConstraints(minWidth: 200, maxWidth: 300),
           decoration: const BoxDecoration(color: Colors.white),
+          padding: const EdgeInsets.only(top: 8),
           child: Column(
               mainAxisSize: MainAxisSize.max,
               crossAxisAlignment: CrossAxisAlignment.end,
-              children: _buildMenu()
-              // [
-              //   _button('Home', FontAwesomeIcons.home, () => null),
-              //   _button('Pesquisar', FontAwesomeIcons.search, () => null),
-              //   _button('Relatórios', FontAwesomeIcons.print, () => null),
-              //   _button('Gerenciar', FontAwesomeIcons.userCog, () => null),
-              //   _button(item.texto, item.icone, item.onPressed)
-              // ],
-              )),
+              children: _buildMenu())),
     );
   }
 }
