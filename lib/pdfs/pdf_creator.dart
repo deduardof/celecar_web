@@ -1,4 +1,6 @@
 import 'package:celecar_web/database/database.dart';
+import 'package:celecar_web/models/periodos.dart';
+import 'package:celecar_web/models/veiculo.dart';
 import 'package:celecar_web/pdfs/pdfdata.dart';
 import 'package:intl/intl.dart';
 import 'package:pdf/pdf.dart';
@@ -9,18 +11,50 @@ class PDFCreator {
   final pdf = pw.Document();
   final String _frota = 'Frota CS BRASIL';
   final String _contrato = 'Contrato 2998/2020';
-  final String periodo = 'Janeiro/2022';
-  final int veiculo;
-  final List<PDFData> viagens = List.empty(growable: true);
+  final PeriodosItem periodo;
+  final Veiculo veiculo;
 
-  PDFCreator({required this.veiculo}) {
+  final List<PDFData> _viagens = List.empty(growable: true);
+
+  PDFCreator({required this.veiculo, required this.periodo}) {
     _getViagens();
   }
 
-  _getViagens() async => await Database().getViagens(
-      veiculo: veiculo,
-      dataInicio: DateTime(2022, 1, 1),
-      dataFim: DateTime(2022, 1, 31));
+  _getViagens() async => await Database()
+          .getViagens(
+              veiculo: veiculo.id,
+              dataInicio: periodo.datetime,
+              dataFim: DateTime(periodo.datetime.year, periodo.datetime.month,
+                      _lastDayOfMonth())
+                  .add(const Duration(hours: 23, minutes: 59, seconds: 59)))
+          .then((list) {
+        _viagens.addAll(list);
+        addPage();
+      });
+
+  _lastDayOfMonth() {
+    switch (periodo.datetime.month) {
+      case 1:
+      case 3:
+      case 5:
+      case 7:
+      case 8:
+      case 10:
+      case 12:
+        return 31;
+      case 4:
+      case 6:
+      case 9:
+      case 11:
+        return 30;
+      case 2:
+        return ((periodo.datetime.year % 4 == 0 &&
+                    periodo.datetime.year % 100 != 0) ||
+                periodo.datetime.year % 400 == 0)
+            ? 29
+            : 28;
+    }
+  }
 
   addPage() async {
     pdf.addPage(pw.Page(
@@ -29,8 +63,8 @@ class PDFCreator {
       orientation: pw.PageOrientation.landscape,
       build: (context) {
         return pw.Column(children: [
-          _title(title: 'DIÁRIO DE BORDO - $periodo'),
-          _subtitle(subtitle: 'HB20S BEP0X00'),
+          _title(title: 'DIÁRIO DE BORDO - ${periodo.nome}'),
+          _subtitle(subtitle: veiculo.getDescricao()),
           _rowTitle(),
           pw.Container(
               decoration: const pw.BoxDecoration(
@@ -47,12 +81,16 @@ class PDFCreator {
 
   _title({required String title}) {
     return pw.Container(
-        color: PdfColors.grey600,
-        padding: pw.EdgeInsets.only(left: 20, top: 5, bottom: 5, right: 10),
+        decoration: pw.BoxDecoration(
+            color: PdfColors.grey600,
+            border: pw.Border.all(width: 1, color: PdfColors.grey600)),
+        padding:
+            const pw.EdgeInsets.only(left: 20, top: 10, bottom: 10, right: 10),
         child: pw.Row(children: [
           pw.Expanded(
               child: pw.Text(title,
-                  style: pw.TextStyle(fontWeight: pw.FontWeight.bold))),
+                  style: pw.TextStyle(
+                      fontSize: 18, fontWeight: pw.FontWeight.bold))),
           pw.Column(
               crossAxisAlignment: pw.CrossAxisAlignment.start,
               children: [pw.Text(_frota), pw.Text(_contrato)])
@@ -61,13 +99,15 @@ class PDFCreator {
 
   _subtitle({required String subtitle}) {
     return pw.Container(
-        color: PdfColors.grey400,
-        padding: pw.EdgeInsets.only(left: 20),
+        decoration: pw.BoxDecoration(
+            color: PdfColors.grey400,
+            border: pw.Border.all(width: 1, color: PdfColors.grey400)),
+        padding: const pw.EdgeInsets.only(left: 20),
         child: pw.Row(mainAxisAlignment: pw.MainAxisAlignment.start, children: [
           pw.Expanded(
               child: pw.Text(subtitle,
                   style: pw.TextStyle(
-                      fontSize: 12, fontWeight: pw.FontWeight.bold))),
+                      fontSize: 18, fontWeight: pw.FontWeight.bold))),
           pw.Text('* informar tipo de Combustível'),
           pw.Padding(
               padding: const pw.EdgeInsets.all(10),
@@ -82,111 +122,193 @@ class PDFCreator {
   }
 
   _rowTitle() {
+    const PdfColor colorBorderTitle = PdfColors.grey400;
     return pw.Container(
+        decoration: pw.BoxDecoration(
+            color: PdfColors.grey600,
+            border: pw.Border.all(width: 1, color: PdfColors.grey600)),
         child: pw.Row(
-      mainAxisAlignment: pw.MainAxisAlignment.center,
-      children: [
-        pw.Container(
-            width: 60,
-            color: PdfColors.amber,
-            child: pw.Text('DATA', textAlign: pw.TextAlign.center)),
-        pw.Container(
-            width: 80,
-            color: PdfColors.red,
-            child: pw.Text('SETOR/OS', textAlign: pw.TextAlign.center)),
-        pw.Container(
-            width: 160,
-            color: PdfColors.amber,
-            child: pw.Column(children: [
-              pw.Text('ITINERÁRIO'),
-              pw.Row(children: [
-                pw.Container(
-                    width: 80,
-                    child: pw.Text('DE', textAlign: pw.TextAlign.center)),
-                pw.Container(
-                    width: 80,
-                    child: pw.Text('PARA', textAlign: pw.TextAlign.center))
-              ])
-            ])),
-        pw.Container(
-            width: 100,
-            color: PdfColors.red,
-            child: pw.Column(children: [
-              pw.Text('SAÍDA', textAlign: pw.TextAlign.center),
-              pw.Row(children: [
-                pw.Container(
-                    width: 50,
-                    child: pw.Text('HORÁRIO',
-                        style: pw.TextStyle(fontSize: 10),
-                        textAlign: pw.TextAlign.center)),
-                pw.Container(
-                    width: 50,
-                    child: pw.Text('KM',
-                        style: pw.TextStyle(fontSize: 10),
-                        textAlign: pw.TextAlign.center))
-              ])
-            ])),
-        pw.Container(
-            width: 100,
-            color: PdfColors.blue,
-            child: pw.Column(children: [
-              pw.Text('CHEGADA', textAlign: pw.TextAlign.center),
-              pw.Row(children: [
-                pw.Container(
-                    width: 50,
-                    child: pw.Text('HORÁRIO',
-                        style: pw.TextStyle(fontSize: 10),
-                        textAlign: pw.TextAlign.center)),
-                pw.Container(
-                    width: 50,
-                    child: pw.Text('KM',
-                        style: pw.TextStyle(fontSize: 10),
-                        textAlign: pw.TextAlign.center))
-              ])
-            ])),
-        pw.Container(
-            width: 120,
-            color: PdfColors.green,
-            child: pw.Column(children: [
-              pw.Text('LITROS'),
-              pw.Row(children: [
-                pw.Container(
-                    width: 60,
-                    child: pw.Text('PRIME', textAlign: pw.TextAlign.center)),
-                pw.Container(
-                    width: 60,
-                    child: pw.Text('OUTROS', textAlign: pw.TextAlign.center))
-              ])
-            ])),
-        pw.Container(
-            width: 40,
-            color: PdfColors.red,
-            child: pw.Container(
-                width: 40,
-                child: pw.Text('*', textAlign: pw.TextAlign.center))),
-        pw.Container(
-            width: 80,
-            color: PdfColors.amber,
-            child: pw.Container(
-                width: 80,
-                child: pw.Text('NOME', textAlign: pw.TextAlign.center))),
-        pw.Container(
-            width: 60,
-            color: PdfColors.green,
-            child: pw.Container(
+          mainAxisAlignment: pw.MainAxisAlignment.center,
+          crossAxisAlignment: pw.CrossAxisAlignment.center,
+          children: [
+            pw.Container(
                 width: 60,
-                child: pw.Text('QTDE PEDÁGIO', textAlign: pw.TextAlign.center)))
-      ],
-    ));
+                height: 40,
+                alignment: pw.Alignment.center,
+                decoration: const pw.BoxDecoration(
+                    border: pw.Border(
+                        right: pw.BorderSide(
+                            width: 0.5, color: colorBorderTitle))),
+                child: pw.Text('DATA',
+                    textAlign: pw.TextAlign.center,
+                    style: const pw.TextStyle(fontSize: 10))),
+            pw.Container(
+                width: 80,
+                height: 40,
+                alignment: pw.Alignment.center,
+                decoration: const pw.BoxDecoration(
+                    border: pw.Border(
+                        right: pw.BorderSide(
+                            width: 0.5, color: colorBorderTitle))),
+                child: pw.Text('SETOR/OS',
+                    textAlign: pw.TextAlign.center,
+                    style: const pw.TextStyle(fontSize: 10))),
+            pw.Container(
+                width: 160,
+                height: 40,
+                decoration: const pw.BoxDecoration(
+                    border: pw.Border(
+                        right: pw.BorderSide(
+                            width: 0.5, color: colorBorderTitle))),
+                child: pw.Column(
+                    mainAxisAlignment: pw.MainAxisAlignment.center,
+                    children: [
+                      pw.Text('ITINERÁRIO',
+                          style: const pw.TextStyle(fontSize: 10)),
+                      pw.Row(children: [
+                        pw.Container(
+                            width: 80,
+                            padding: const pw.EdgeInsets.symmetric(vertical: 5),
+                            child: pw.Text('DE',
+                                textAlign: pw.TextAlign.center,
+                                style: const pw.TextStyle(fontSize: 8))),
+                        pw.Container(
+                            width: 80,
+                            padding: const pw.EdgeInsets.symmetric(vertical: 5),
+                            child: pw.Text('PARA',
+                                textAlign: pw.TextAlign.center,
+                                style: const pw.TextStyle(fontSize: 8)))
+                      ])
+                    ])),
+            pw.Container(
+                width: 100,
+                height: 40,
+                decoration: const pw.BoxDecoration(
+                    border: pw.Border(
+                        right: pw.BorderSide(
+                            width: 0.5, color: colorBorderTitle))),
+                child: pw.Column(
+                    mainAxisAlignment: pw.MainAxisAlignment.center,
+                    children: [
+                      pw.Text('SAÍDA',
+                          textAlign: pw.TextAlign.center,
+                          style: const pw.TextStyle(fontSize: 10)),
+                      pw.Row(children: [
+                        pw.Container(
+                            width: 50,
+                            padding: const pw.EdgeInsets.symmetric(vertical: 5),
+                            child: pw.Text('HORÁRIO',
+                                style: const pw.TextStyle(fontSize: 8),
+                                textAlign: pw.TextAlign.center)),
+                        pw.Container(
+                            width: 50,
+                            padding: const pw.EdgeInsets.symmetric(vertical: 5),
+                            child: pw.Text('KM',
+                                style: const pw.TextStyle(fontSize: 8),
+                                textAlign: pw.TextAlign.center))
+                      ])
+                    ])),
+            pw.Container(
+                width: 100,
+                height: 40,
+                decoration: const pw.BoxDecoration(
+                    border: pw.Border(
+                        right: pw.BorderSide(
+                            width: 0.5, color: colorBorderTitle))),
+                child: pw.Column(
+                    mainAxisAlignment: pw.MainAxisAlignment.center,
+                    children: [
+                      pw.Text('CHEGADA',
+                          textAlign: pw.TextAlign.center,
+                          style: const pw.TextStyle(fontSize: 10)),
+                      pw.Row(children: [
+                        pw.Container(
+                            width: 50,
+                            padding: const pw.EdgeInsets.symmetric(vertical: 5),
+                            child: pw.Text('HORÁRIO',
+                                style: const pw.TextStyle(fontSize: 8),
+                                textAlign: pw.TextAlign.center)),
+                        pw.Container(
+                            width: 50,
+                            padding: const pw.EdgeInsets.symmetric(vertical: 5),
+                            child: pw.Text('KM',
+                                style: const pw.TextStyle(fontSize: 8),
+                                textAlign: pw.TextAlign.center))
+                      ])
+                    ])),
+            pw.Container(
+                width: 120,
+                height: 40,
+                decoration: const pw.BoxDecoration(
+                    border: pw.Border(
+                        right: pw.BorderSide(
+                            width: 0.5, color: colorBorderTitle))),
+                child: pw.Column(
+                    mainAxisAlignment: pw.MainAxisAlignment.center,
+                    children: [
+                      pw.Text('LITROS',
+                          style: const pw.TextStyle(fontSize: 10)),
+                      pw.Row(children: [
+                        pw.Container(
+                            width: 60,
+                            padding: const pw.EdgeInsets.symmetric(vertical: 5),
+                            child: pw.Text('PRIME',
+                                textAlign: pw.TextAlign.center,
+                                style: const pw.TextStyle(fontSize: 8))),
+                        pw.Container(
+                            width: 60,
+                            padding: const pw.EdgeInsets.symmetric(vertical: 5),
+                            child: pw.Text('OUTROS',
+                                textAlign: pw.TextAlign.center,
+                                style: const pw.TextStyle(fontSize: 8)))
+                      ])
+                    ])),
+            pw.Container(
+                width: 30,
+                height: 40,
+                alignment: pw.Alignment.center,
+                decoration: const pw.BoxDecoration(
+                    border: pw.Border(
+                        right: pw.BorderSide(
+                            width: 0.5, color: colorBorderTitle))),
+                child: pw.Container(
+                    width: 40,
+                    child: pw.Text('*', textAlign: pw.TextAlign.center))),
+            pw.Container(
+                width: 94,
+                height: 40,
+                alignment: pw.Alignment.center,
+                decoration: const pw.BoxDecoration(
+                    border: pw.Border(
+                        right: pw.BorderSide(
+                            width: 0.5, color: colorBorderTitle))),
+                child: pw.Container(
+                    width: 80,
+                    child: pw.Text('NOME',
+                        textAlign: pw.TextAlign.center,
+                        style: const pw.TextStyle(fontSize: 10)))),
+            pw.Container(
+                width: 60,
+                child: pw.Container(
+                    width: 60,
+                    child: pw.Text('QTDE PEDÁGIO',
+                        textAlign: pw.TextAlign.center,
+                        style: const pw.TextStyle(fontSize: 10))))
+          ],
+        ));
   }
 
   _createData() {
     List<pw.Widget> list = List.empty(growable: true);
-    for (var data in viagens) {
+    for (var data in _viagens) {
       list.add(pw.Container(
-        //padding: const pw.EdgeInsets.symmetric(vertical: 4),
-        child: _rowData(data: data),
+        child: _rowData(data),
       ));
+    }
+    if (list.length < 20) {
+      for (int i = list.length; i < 20; i++) {
+        list.add(pw.Container(child: _rowData(null)));
+      }
     }
     return list;
   }
@@ -200,79 +322,65 @@ class PDFCreator {
             border: pw.Border(
                 right: pw.BorderSide(width: 1, color: PdfColors.grey),
                 bottom: pw.BorderSide(width: 1, color: PdfColors.grey))),
-        child: pw.Text(data, textAlign: pw.TextAlign.center));
+        child: pw.Text(data,
+            textAlign: pw.TextAlign.center,
+            maxLines: 1,
+            overflow: pw.TextOverflow.clip));
   }
 
-  _rowData({required PDFData data}) {
+  _rowData(PDFData? data) {
     return pw.Row(children: [
-      _box(data: DateFormat('dd/MM').format(data.data), width: 60),
-      _box(data: data.setor, width: 80),
-      _box(data: data.de, width: 80),
-      _box(data: data.para, width: 80),
-      _box(data: DateFormat('HH:mm').format(data.horarioSaida), width: 50),
-      _box(data: data.quilometrageSaida.toString(), width: 50),
-      _box(data: DateFormat('HH:mm').format(data.horarioChegada), width: 50),
-      _box(data: data.quilometragemChegada.toString(), width: 50),
-      _box(data: (data.prime > 0) ? data.prime.toString() : ' ', width: 60),
-      _box(data: (data.outros > 0) ? data.outros.toString() : ' ', width: 60),
-      _box(data: (data.tipo > 0) ? data.tipo.toString() : ' ', width: 40),
-      _box(data: data.nome, width: 80),
-      _box(data: (data.pedagio > 0) ? data.pedagio.toString() : ' ', width: 60),
-      // pw.Container(
-      //     width: 60,
-      //     padding: pw.EdgeInsets.symmetric(vertical: 4),
-      //     color: PdfColors.amber,
-      //     child: pw.Text(DateFormat('dd/MM').format(data.data),
-      //         textAlign: pw.TextAlign.center)),
-      // pw.Container(
-      //     width: 80,
-      //     color: PdfColors.grey,
-      //     child: pw.Text(data.setor, textAlign: pw.TextAlign.center)),
-      // pw.Container(
-      //     width: 80, child: pw.Text(data.de, textAlign: pw.TextAlign.center)),
-      // pw.Container(
-      //     width: 80,
-      //     color: PdfColors.grey,
-      //     child: pw.Text(data.para, textAlign: pw.TextAlign.center)),
-      // pw.Container(
-      //     width: 50,
-      //     child: pw.Text(DateFormat('HH:mm').format(data.horarioSaida),
-      //         textAlign: pw.TextAlign.center)),
-      // pw.Container(
-      //     width: 50,
-      //     color: PdfColors.grey,
-      //     child: pw.Text(data.quilometrageSaida.toString(),
-      //         textAlign: pw.TextAlign.center)),
-      // pw.Container(
-      //     width: 50,
-      //     child: pw.Text(DateFormat('HH:mm').format(data.horarioChegada),
-      //         textAlign: pw.TextAlign.center)),
-      // pw.Container(
-      //     width: 50,
-      //     color: PdfColors.grey,
-      //     child: pw.Text(data.quilometragemChegada.toString(),
-      //         textAlign: pw.TextAlign.center)),
-      // pw.Container(
-      //     width: 60,
-      //     child: pw.Text((data.prime > 0) ? data.prime.toString() : '',
-      //         textAlign: pw.TextAlign.center)),
-      // pw.Container(
-      //     width: 60,
-      //     color: PdfColors.grey,
-      //     child: pw.Text((data.outros > 0) ? data.outros.toString() : '',
-      //         textAlign: pw.TextAlign.center)),
-      // pw.Container(
-      //     width: 40,
-      //     child: pw.Text((data.tipo > 0) ? data.tipo.toString() : '',
-      //         textAlign: pw.TextAlign.center)),
-      // pw.Container(
-      //     width: 80,
-      //     color: PdfColors.grey,
-      //     child: pw.Text(data.nome, textAlign: pw.TextAlign.center)),
-      // pw.Container(
-      //     width: 60,
-      //     child: pw.Text((data.pedagio > 0) ? data.pedagio.toString() : '',
-      //         textAlign: pw.TextAlign.center))
+      _box(
+          data: (data == null) ? '' : DateFormat('dd/MM').format(data.data),
+          width: 60),
+      _box(data: (data == null) ? '' : data.setor, width: 80),
+      _box(data: (data == null) ? '' : data.de, width: 80),
+      _box(data: (data == null) ? '' : data.para, width: 80),
+      _box(
+          data: (data == null)
+              ? ''
+              : DateFormat('HH:mm').format(data.horarioSaida),
+          width: 50),
+      _box(
+          data: (data == null) ? '' : data.quilometrageSaida.toString(),
+          width: 50),
+      _box(
+          data: (data == null)
+              ? ''
+              : DateFormat('HH:mm').format(data.horarioChegada),
+          width: 50),
+      _box(
+          data: (data == null) ? '' : data.quilometragemChegada.toString(),
+          width: 50),
+      _box(
+          data: (data == null)
+              ? ''
+              : (data.prime > 0)
+                  ? data.prime.toString()
+                  : ' ',
+          width: 60),
+      _box(
+          data: (data == null)
+              ? ''
+              : (data.outros > 0)
+                  ? data.outros.toString()
+                  : ' ',
+          width: 60),
+      _box(
+          data: (data == null)
+              ? ''
+              : (data.tipo > 0)
+                  ? data.tipo.toString()
+                  : ' ',
+          width: 30),
+      _box(data: (data == null) ? '' : data.nome, width: 94),
+      _box(
+          data: (data == null)
+              ? ''
+              : (data.pedagio > 0)
+                  ? data.pedagio.toString()
+                  : ' ',
+          width: 58),
     ]);
   }
 }

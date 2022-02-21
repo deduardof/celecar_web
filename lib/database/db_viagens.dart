@@ -18,8 +18,7 @@ class DBViagens {
         'horarioInicio, localInicio, localDestino, horarioFim, quilometragemInicio, quilometragemFim, setor, usuario: usuarios(nome), veiculo: veiculos(modelo,placa)';
     PostgrestResponse response;
 
-    print(
-        'Setor: $setor | Veiculo: $veiculo | Usuário: $usuario | Data início: $dataInicio | Data fim: $dataFim');
+    //print('Setor: $setor | Veiculo: $veiculo | Usuário: $usuario | Data início: $dataInicio | Data fim: $dataFim');
 
     // setor: todos | veiculo: todos | usuario: todos
     //if (setor == Setor.todos) {

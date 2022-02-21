@@ -35,7 +35,7 @@ class Periodos {
       for (int m = month; m > 0; m--) {
         periodos.add(PeriodosItem(
             nome: _months.elementAt(m - 1) + '/' + y.toString(),
-            datetime: DateTime(y, month)));
+            datetime: DateTime(y, m)));
       }
       month = 12;
     }

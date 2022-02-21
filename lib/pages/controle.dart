@@ -61,7 +61,7 @@ class _ControleState extends State<Controle> {
         }
       case Pages.relatorios:
         {
-          _page = RelatoriosPage();
+          _page = const RelatoriosPage();
           break;
         }
       case Pages.gerenciar:
@@ -73,7 +73,7 @@ class _ControleState extends State<Controle> {
   }
 
   _openVeiculo(Veiculo veiculo) {
-    print('Veículo: $veiculo - ${veiculo.setor}');
+    //print('Veículo: $veiculo - ${veiculo.setor}');
     setState(() {
       _page = VeiculoPage(veiculo: veiculo);
     });

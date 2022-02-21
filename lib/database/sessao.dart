@@ -19,8 +19,9 @@ class Sessao {
           setor: sessao.get('setor', defaultValue: 0),
           setorNome: sessao.get('setorNome', defaultValue: ''),
           loggedIn: sessao.get('loggedIn', defaultValue: DateTime(2020, 1, 1)));
-      print('[Sessao] Sessão carregada com sucesso.');
       return usuario;
+    } else {
+      return null;
     }
   }
 
@@ -33,8 +34,6 @@ class Sessao {
       sessao.put('setor', usuario.setor);
       sessao.put('setorNome', usuario.setorNome);
       sessao.put('loggedIn', usuario.loggedIn);
-      //sessao.close();
-      print('[Sessao] Sessão salva com sucesso.');
     });
   }
 

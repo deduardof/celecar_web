@@ -2,6 +2,7 @@ import 'package:celecar_web/database/database.dart';
 import 'package:celecar_web/models/periodos.dart';
 import 'package:celecar_web/models/setor.dart';
 import 'package:celecar_web/models/veiculo.dart';
+import 'package:celecar_web/pdfs/pdf_creator.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
@@ -163,7 +164,11 @@ class _RelatoriosPageState extends State<RelatoriosPage> {
                 Padding(
                   padding: const EdgeInsets.all(5.0),
                   child: ElevatedButton(
-                      onPressed: () {},
+                      onPressed: () {
+                        PDFCreator(
+                            veiculo: _veiculoSelected,
+                            periodo: _periodoSelected);
+                      },
                       child:
                           Row(mainAxisSize: MainAxisSize.min, children: const [
                         Padding(
